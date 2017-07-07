@@ -1,0 +1,160 @@
+<script>
+$(document).ready(function() {
+    $('#bootstrapSelectForm')
+        .find('[name="type"]')
+            .selectpicker()
+            .change(function(e) {
+                /* Revalidate the color when it is changed */
+                $('#bootstrapSelectForm').formValidation('revalidateField', 'colors');
+            })
+            .end()
+        .formValidation({
+            framework: 'bootstrap',
+            excluded: ':disabled',
+            icon: {
+                valid: 'glyphicon glyphicon-ok',
+                invalid: 'glyphicon glyphicon-remove',
+                validating: 'glyphicon glyphicon-refresh'
+            },
+            fields: {
+              type: {
+                  validators: {
+                      notEmpty: {
+                          message: 'Please select your native language.'
+                      }
+                  }
+              }
+            }
+        });
+});
+
+function HandleCheckbox(cb){
+  console.log("Checkbox "+cb.id+":"+cb.checked);
+}
+</script>
+
+
+<!-- Modal -->
+<div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Add Watcher</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form action="/api/watch/create" method="post">
+          <div class="form-group">
+            <label for="action">Type</label>
+            <select class="form-control" id="action" name="action">
+              <option>Tweet</option>
+              <option>ShareOnFacebook</option>
+              <option>PayMyBill</option>
+              <option>RenewAWS</option>
+              <option>ConquerWorld</option>
+            </select>
+          </div>
+          <h3>Smart Contract Details</h3>
+          <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" class="form-control" id="contract_name" name="contract_name" placeholder="Contract Name">
+          </div>
+          <div class="form-group">
+            <label for="address">Contract Address</label>
+            <input type="text" class="form-control" id="contract_address" name="contract_address" placeholder="Contract Address">
+          </div>
+          <div class="form-group">
+            <label for="event">Event</label>
+            <input type="text" class="form-control" id="event" name="event" placeholder="SendTweetEvent">
+          </div>
+          <div class="form-group">
+            <label for="data">API Details</label>
+            <textarea class="form-control" id="data" name="data" rows="5"></textarea>
+          </div>
+          <!--
+          <h3>API Details</h3>
+          <div class="form-group">
+            <label for="consumer_key">Consumer Key</label>
+            <input type="password" class="form-control" id="consumer_key" placeholder="Consumer Key">
+          </div>
+          <div class="form-group">
+            <label for="consumer_secret">Contract Secret</label>
+            <input type="password" class="form-control" id="consumer_secret" placeholder="Consumer Secret">
+          </div>
+          <div class="form-group">
+            <label for="access_token_key">Access Token Key</label>
+            <input type="password" class="form-control" id="access_token_key" placeholder="Access Token Key">
+          </div>
+          <div class="form-group">
+            <label for="access_token_secret">Contract Address</label>
+            <input type="password" class="form-control" id="access_token_secret" placeholder="Access Token Secret">
+          </div>
+        -->
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-6">
+      <img src="/images/logo.jpg" height="50" >
+      <medium>Make your Smart Contract Smarter!</medium>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-2">
+      <h5>Active Watchers</h5>
+    </div>
+    <div class="col-md-offset-8 col-md-2">
+      <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addModal">Add Watcher</button>
+    </div>
+  </div>
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Contract Address</th>
+        <th>Toggle</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each watchers}}
+      <tr>
+        <td>{{name}}</td>
+        <td>{{action}}</td>
+        <td>{{address}}</td>
+        <td><input type="checkbox" id="{{address}}" {{checked}} data-toggle="toggle"></td>
+        <script>
+          $(function() {
+            $('#{{address}}').change(function() {
+              if(!$(this).prop('checked')){
+                $.post("/api/watch/delete",
+                {
+                  "address":"{{address}}","id":"{{address}}"
+                },function(data,status){
+                  console.log("data:"+data+"status:"+status);
+                }
+              );
+            }else{
+              $.post("/api/watch/restart",
+              {
+                "address":"{{address}}","id":"{{address}}"
+              },function(data,status){
+                console.log("data:"+data+"status:"+status);
+              });
+            }
+            });
+          });
+        </script>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</div>
